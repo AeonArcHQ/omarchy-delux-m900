@@ -33,17 +33,33 @@ the Windows driver.
   `set <field> <json>`, for example `set polling 2`, `set light.mode 1` or
   `set light.color '#ff0000'`.
 
+## Requirements
+
+`python` (the Omarchy default) and the udev rule below, which gives the
+local session access to the receiver.
+
 ## Installation
 
 ```sh
 omarchy plugin add https://github.com/AeonArcHQ/omarchy-delux-m900 --enable
-sudo install -m 644 udev/71-delux-m900-hidraw.rules /etc/udev/rules.d/
+sudo install -m 644 "$HOME/.config/omarchy/plugins/com.aeonarc.delux-m900/udev/71-delux-m900-hidraw.rules" /etc/udev/rules.d/
 sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=hidraw
 ```
 
 The udev rule gives the local session (`uaccess`) access only to interface
 2 of the receiver, the vendor interface. Motion and clicks stay restricted
 to root.
+
+## Removing
+
+```sh
+omarchy plugin remove com.aeonarc.delux-m900
+sudo rm /etc/udev/rules.d/71-delux-m900-hidraw.rules
+sudo udevadm control --reload
+```
+
+Optionally delete the saved profile:
+`rm ~/.local/state/delux-m900/profile.json`.
 
 ## How it works
 
