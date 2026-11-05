@@ -1,0 +1,2 @@
+# DELUX receiver: allow active local session access to vendor interface only.
+SUBSYSTEM=="hidraw", ENV{ID_VENDOR_ID}=="1d57", ENV{ID_MODEL_ID}=="fa60", ENV{ID_USB_INTERFACE_NUM}=="02", TAG+="uaccess"
