@@ -11,7 +11,7 @@ the Windows driver.
 - The tooltip gives the state: on battery, charging or fully charged. With
   no answer, it shows the last level read.
 - `showPercentage` option (default `true`): turned off, only the icon stays
-  in the bar.
+  in the bar. A right click on the bar entry flips it.
 - A click opens the panel: DPI stages (the current one, the value of each
   and how many are active), polling (125 to 1000 Hz), light mode and color,
   brightness, speed, time to switch off, lift-off, sensor mode, motion

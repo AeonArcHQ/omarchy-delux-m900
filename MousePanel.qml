@@ -78,6 +78,13 @@ Panel {
     function lastError(): string { return m900.busy ? "busy" : m900.lastError }
   }
 
+  // A right click flips the percentage and saves the choice, as the shell's
+  // battery widget does (shell/plugins/panels/power/Panel.qml).
+  function togglePercentage(): void {
+    root.settings = Object.assign({}, root.settings, { showPercentage: !root.setting("showPercentage", true) })
+    if (root.bar && root.bar.shell) root.bar.shell.updateEntryInline(root.moduleName, root.settings)
+  }
+
   BarIconButton {
     id: button
     anchors.fill: parent
@@ -91,7 +98,10 @@ Panel {
     active: root.view.active
     dimmed: root.view.dimmed
     tooltipText: Model.tooltip(m900.battery)
-    onPressed: function(buttonCode) { root.toggle() }
+    onPressed: function(buttonCode) {
+      if (buttonCode === Qt.RightButton) root.togglePercentage()
+      else root.toggle()
+    }
   }
 
   KeyboardPanel {
