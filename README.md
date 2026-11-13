@@ -109,6 +109,14 @@ tests/check.sh                        # unittest, qmltestrunner, plugin validate
 6. Restore defaults goes back to Rainbow Wave, 800 DPI, 1000 Hz and the
    side buttons as forward and back.
 
+## Releasing
+
+1. Bump `"version"` in `manifest.json` and commit it as `Release <version>`.
+2. Tag that commit with an annotated tag: `git tag -a v<version> -m v<version>`.
+3. Push the commit and the tag, then wait for the `check` workflow to pass.
+4. Publish a GitHub release for the tag with English notes, one line per
+   change a user can see, linking the issue it closes (`(#1)`).
+
 ## License
 
 MIT.
