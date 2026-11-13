@@ -44,10 +44,9 @@ function applyLine(previous, line) {
 function barView(model, showPercentage) {
   var m = model || { connection: "starting", state: "", level: -1 }
   var ready = m.connection === "ready"
-  var text = GLYPH_MOUSE
-  if (ready && showPercentage) text += " " + m.level + "%"
   return {
-    text: text,
+    glyph: GLYPH_MOUSE,
+    label: ready && showPercentage ? m.level + "%" : "",
     active: ready && m.state === "discharging" && m.level <= LOW_LEVEL,
     dimmed: !ready
   }

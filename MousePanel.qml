@@ -78,15 +78,18 @@ Panel {
     function lastError(): string { return m900.busy ? "busy" : m900.lastError }
   }
 
-  WidgetButton {
+  BarIconButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.view.text
+    text: root.view.glyph
+    labelText: root.view.label
+    // The percentage keeps the caption size it had before the entry moved
+    // to BarIconButton; the glyph is sized by the shell either way.
+    fontSize: Style.font.caption
+    slotSize: Style.bar.iconSlot * (root.view.label !== "" && !button.vertical ? 2 : 1)
     active: root.view.active
     dimmed: root.view.dimmed
-    fontSize: Style.font.caption
-    horizontalMargin: 6
     tooltipText: Model.tooltip(m900.battery)
     onPressed: function(buttonCode) { root.toggle() }
   }

@@ -10,8 +10,8 @@ TestCase {
   function test_a_power_line_makes_the_widget_ready() {
     var m = Model.applyLine(null, line({ ok: true, device: "/dev/hidraw2", state: "discharging", level: 74 }))
     compare(m, { connection: "ready", state: "discharging", level: 74 })
-    compare(Model.barView(m, true).text, "󰍽 74%")
-    compare(Model.barView(m, false).text, "󰍽")
+    compare(Model.barView(m, true), { glyph: "󰍽", label: "74%", active: false, dimmed: false })
+    compare(Model.barView(m, false).label, "")
     compare(Model.tooltip(m), "DELUX M900 Pro · 74% · on battery")
   }
 
@@ -28,7 +28,7 @@ TestCase {
     var ready = Model.applyLine(null, line({ ok: true, state: "full", level: 100 }))
     var asleep = Model.applyLine(ready, line({ ok: false, error: "asleep" }))
     compare(asleep.connection, "asleep")
-    compare(Model.barView(asleep, true), { text: "󰍽", active: false, dimmed: true })
+    compare(Model.barView(asleep, true), { glyph: "󰍽", label: "", active: false, dimmed: true })
     compare(Model.tooltip(asleep), "DELUX M900 Pro · the receiver stopped sending events (last: 100%)")
   }
 
