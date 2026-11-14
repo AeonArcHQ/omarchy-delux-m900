@@ -96,8 +96,9 @@ tests/check.sh                        # unittest, qmltestrunner, plugin validate
 - The `modelData` of a `Repeater` over arrays arrives as a Qt list, which
   fails `Array.isArray`; treat it as array-like (`length` and indexes).
 - `tools/`: `listen.py` (receiver input reports), `sendfeat.py` (sends a
-  raw feature report) and `rate.py` (polling rate on evdev, as root:
-  `sudo python3 -I tools/rate.py /dev/input/eventN`).
+  raw feature report), `powerlog.py` (logs every change of the power
+  report for the given number of seconds) and `rate.py` (polling rate on evdev,
+  as root: `sudo python3 -I tools/rate.py /dev/input/eventN`).
 
 ### Checklist with the mouse (wake it before each change)
 

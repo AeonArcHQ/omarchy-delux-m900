@@ -84,7 +84,7 @@ The app marks the mouse as disconnected after 6 s without an input report (timer
 
 ### 2026-11-14: the level byte is frozen while charging
 
-Observations from `tools/listen.py` / a logger on `/dev/hidraw2`:
+Observations from `tools/listen.py` / `tools/powerlog.py /dev/hidraw2 <seconds>`:
 
 - charging 18:55–19:07: `(3, 58)` on every power report for 12 min — the level byte is frozen while charging;
 - unplugged: the level is measured again and drops 62 → 61 → 60 → 59 → 58;
