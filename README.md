@@ -10,6 +10,10 @@ the Windows driver.
   respond.
 - The tooltip gives the state: on battery, charging or fully charged. With
   no answer, it shows the last level read.
+- While charging, the mouse repeats its last measurement instead of
+  measuring again, so the level does not climb on its own. The tooltip says
+  when that level was measured; turning the mouse off and on with its power
+  switch measures it again.
 - `showPercentage` option (default `true`): turned off, only the icon stays
   in the bar. A right click on the bar entry flips it.
 - A click opens the panel: DPI stages (the current one, the value of each
@@ -97,7 +101,9 @@ tests/check.sh                        # unittest, qmltestrunner, plugin validate
 
 ### Checklist with the mouse (wake it before each change)
 
-1. The bar shows the battery; on the cable, the tooltip says charging.
+1. The bar shows the battery; on the cable, the tooltip says charging and
+   when the level was measured. Turning the mouse off and on with its
+   power switch updates the level and the time.
 2. Each DPI stage changes the cursor speed; so does changing the value of
    the current stage. The mouse's DPI button moves the selection in the
    panel.
