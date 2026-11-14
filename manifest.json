@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "com.aeonarc.delux-m900",
   "name": "DELUX M900 Pro",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Aeon Arc",
   "license": "MIT",
   "description": "Battery, DPI, polling rate, lighting and sensor settings of the DELUX M900 Pro wireless mouse in the Omarchy bar, over its 2.4G receiver and without the Windows driver.",
