@@ -10,7 +10,7 @@ import "Model.js" as Model
 Item {
   id: root
 
-  property var battery: ({ connection: "starting", state: "", level: -1 })
+  property var battery: ({ connection: "starting", state: "", level: -1, measuredAt: null })
   property var profile: Model.normalizeProfile(null)
   property bool busy: false
   property string lastError: ""
@@ -75,7 +75,7 @@ Item {
   }
 
   function onWatchLine(line) {
-    root.battery = Model.applyLine(root.battery, line)
+    root.battery = Model.applyLine(root.battery, line, Date.now())
     var moved = Model.applyEvent(root.profile, line)
     if (moved === null || JSON.stringify(moved) === JSON.stringify(root.profile)) return
     root.profile = moved
@@ -107,7 +107,7 @@ Item {
     // The helper retries on its own; it only exits on a crash. Start it again
     // after a pause instead of spinning.
     onExited: function(exitCode) {
-      root.battery = Model.applyLine(root.battery, "")
+      root.battery = Model.applyLine(root.battery, "", Date.now())
       restartTimer.restart()
     }
   }

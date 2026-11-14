@@ -8,8 +8,8 @@ TestCase {
   function line(object) { return JSON.stringify(object) }
 
   function test_a_power_line_makes_the_widget_ready() {
-    var m = Model.applyLine(null, line({ ok: true, device: "/dev/hidraw2", state: "discharging", level: 74 }))
-    compare(m, { connection: "ready", state: "discharging", level: 74 })
+    var m = Model.applyLine(null, line({ ok: true, device: "/dev/hidraw2", state: "discharging", level: 74 }), 1000)
+    compare(m, { connection: "ready", state: "discharging", level: 74, measuredAt: 1000 })
     compare(Model.barView(m, true), { glyph: "󰍽", label: "74%", active: false, dimmed: false })
     compare(Model.barView(m, false).label, "")
     compare(Model.tooltip(m), "DELUX M900 Pro · 74% · on battery")
@@ -88,6 +88,48 @@ TestCase {
   function test_dpi_events_do_not_disturb_the_battery_state() {
     var ready = Model.applyLine(null, line({ ok: true, event: "power", state: "charging", level: 50 }))
     compare(Model.applyLine(ready, line({ ok: true, event: "dpi", stage: 2 })), ready)
+  }
+
+  // While charging the firmware freezes the level byte and repeats it every
+  // 2 s; only a level change is a fresh measurement.
+  function test_measured_at_marks_when_the_level_was_measured() {
+    var m = Model.applyLine(null, line({ ok: true, state: "charging", level: 58 }), 1000)
+    compare(m.measuredAt, 1000)
+    var repeated = Model.applyLine(m, line({ ok: true, state: "charging", level: 58 }), 2000)
+    compare(repeated.measuredAt, 1000)
+    var fresh = Model.applyLine(repeated, line({ ok: true, state: "charging", level: 89 }), 3000)
+    compare(fresh.measuredAt, 3000)
+    var asleep = Model.applyLine(fresh, line({ ok: false, error: "asleep" }), 4000)
+    compare(asleep.measuredAt, 3000)
+    var dpi = Model.applyLine(fresh, line({ ok: true, event: "dpi", stage: 2 }), 5000)
+    compare(dpi.measuredAt, 3000)
+  }
+
+  // Plugging the cable back in does not measure again: a state change at the
+  // same level keeps the previous measuredAt (docs/re/findings.md).
+  function test_a_state_change_alone_is_not_a_fresh_measurement() {
+    var m = Model.applyLine(null, line({ ok: true, state: "discharging", level: 58 }), 1000)
+    compare(m.measuredAt, 1000)
+    var plugged = Model.applyLine(m, line({ ok: true, state: "charging", level: 58 }), 2000)
+    compare(plugged.measuredAt, 1000)
+    var fresh = Model.applyLine(plugged, line({ ok: true, state: "charging", level: 89 }), 3000)
+    compare(fresh.measuredAt, 3000)
+  }
+
+  // The default hhmm formatter prints local time; built from a local Date so
+  // the expectation holds in any time zone.
+  function test_the_default_formatter_shows_local_hhmm() {
+    var at = new Date(2026, 10, 14, 9, 5).getTime()
+    var m = Model.applyLine(null, line({ ok: true, state: "charging", level: 89 }), at)
+    verify(Model.tooltip(m).indexOf("measured at 09:05") >= 0)
+  }
+
+  function test_charging_tooltip_says_when_the_level_was_measured() {
+    var m = Model.applyLine(null, line({ ok: true, state: "charging", level: 89 }), 1000)
+    var at = function(ms) { return ms === 1000 ? "19:12" : "??:??" }
+    compare(Model.tooltip(m, at), "DELUX M900 Pro · 89% · charging · measured at 19:12 — turn the mouse off and on to measure again")
+    var discharging = Model.applyLine(null, line({ ok: true, state: "discharging", level: 74 }), 1000)
+    compare(Model.tooltip(discharging, at), "DELUX M900 Pro · 74% · on battery")
   }
 
   function test_apply_errors_tell_what_to_do() {

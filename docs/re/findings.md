@@ -73,7 +73,7 @@ Format: `03 <model> <event> <b3> <b4>`. `sub_4171a0` builds `arg0 = b2<<8 | b1` 
 
 Power state (`b3`, event `0x40`):
 - `2`: fully charged. The UI shows 100%.
-- `3`: charging. The UI animates "charging", and `b4` still carries the level.
+- `3`: charging. The UI animates "charging", and `b4` carries the last measurement, frozen while charging.
 - others: discharging. The UI shows `b4` when 1 ≤ `b4` ≤ 100.
 
 Real readings on 2026-10-22 (`python3 -I tools/listen.py /dev/hidraw2 10`):
@@ -81,6 +81,17 @@ Real readings on 2026-10-22 (`python3 -I tools/listen.py /dev/hidraw2 10`):
 - without the cable: `03 3d 40 01 4d` = M900PRO, in use (`b3=1`), 77%. This confirms that `b3=1` is the normal state and `b4` is the level.
 
 The app marks the mouse as disconnected after 6 s without an input report (timer `0x2e0`, 6000 ms).
+
+### 2026-11-14: the level byte is frozen while charging
+
+Observations from `tools/listen.py` / a logger on `/dev/hidraw2`:
+
+- charging 18:55–19:07: `(3, 58)` on every power report for 12 min — the level byte is frozen while charging;
+- unplugged: the level is measured again and drops 62 → 61 → 60 → 59 → 58;
+- plugging the cable back in does not measure again (stayed at 58);
+- power switch off/on while charging measures again: 58 → 89 at 19:12:33;
+- `omarchy-shell com.aeonarc.delux-m900 set polling 3` (ACK `03 3d 50 00 06`) does not measure again: stayed at 89;
+- DELUX.exe ignores `b4` while charging and animates a fake 0–100 sweep (`sub_4603d0`, timer `SetTimer 0x2e3`).
 
 
 ## Configuration commands (feature reports, MS_15)

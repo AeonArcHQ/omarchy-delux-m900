@@ -20,9 +20,14 @@ var STATE_LABELS = {
 }
 
 // Folds one helper line into the widget state. The last known level survives
-// errors, so the tooltip can still say what the battery had.
-function applyLine(previous, line) {
-  var prev = previous || { connection: "starting", state: "", level: -1 }
+// errors, so the tooltip can still say what the battery had. `now` is ms
+// since epoch: a power line that changes the level is a fresh measurement,
+// so it is when the shown level was measured. A change of state alone is
+// not: plugging the cable back in does not measure again, so a
+// discharging→charging line at the same level keeps the previous
+// `measuredAt` (docs/re/findings.md).
+function applyLine(previous, line, now) {
+  var prev = previous || { connection: "starting", state: "", level: -1, measuredAt: null }
   var message = null
   try { message = JSON.parse(String(line || "")) } catch (error) { message = null }
   if (!message || typeof message !== "object") return Object.assign({}, prev, { connection: "error" })
@@ -38,11 +43,14 @@ function applyLine(previous, line) {
   if (!STATE_LABELS[message.state] || !(level >= 0 && level <= 100)) {
     return Object.assign({}, prev, { connection: "error" })
   }
-  return { connection: "ready", state: String(message.state), level: Math.round(level) }
+  var state = String(message.state)
+  var rounded = Math.round(level)
+  var measuredAt = (prev.level === rounded && prev.measuredAt != null) ? prev.measuredAt : now
+  return { connection: "ready", state: state, level: rounded, measuredAt: measuredAt }
 }
 
 function barView(model, showPercentage) {
-  var m = model || { connection: "starting", state: "", level: -1 }
+  var m = model || { connection: "starting", state: "", level: -1, measuredAt: null }
   var ready = m.connection === "ready"
   return {
     glyph: GLYPH_MOUSE,
@@ -52,13 +60,29 @@ function barView(model, showPercentage) {
   }
 }
 
-function tooltip(model) {
-  var m = model || { connection: "starting", state: "", level: -1 }
+// Local "HH:MM" (24-hour, zero-padded) for a ms-since-epoch time. Passed to
+// `tooltip` so tests pin the clock instead of reading the machine's.
+function hhmm(ms) {
+  var d = new Date(ms)
+  return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)
+}
+
+function tooltip(model, formatTime) {
+  var m = model || { connection: "starting", state: "", level: -1, measuredAt: null }
   var title = "DELUX M900 Pro"
-  if (m.connection === "ready") return title + " · " + m.level + "% · " + STATE_LABELS[m.state]
-  var text = title + " · " + NOTICES[m.connection]
-  if (m.level >= 0) text += " (last: " + m.level + "%)"
-  return text
+  if (m.connection === "ready") {
+    var text = title + " · " + m.level + "% · " + STATE_LABELS[m.state]
+    // While charging the firmware repeats the last measurement; say when it
+    // was taken and how to get a fresh one.
+    if (m.state === "charging" && m.measuredAt != null) {
+      var format = formatTime || hhmm
+      text += " · measured at " + format(m.measuredAt) + " — turn the mouse off and on to measure again"
+    }
+    return text
+  }
+  var notice = title + " · " + NOTICES[m.connection]
+  if (m.level >= 0) notice += " (last: " + m.level + "%)"
+  return notice
 }
 
 // ---------- Configuration (feature reports, docs/re/findings.md) ----------
