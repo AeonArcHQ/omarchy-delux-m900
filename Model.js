@@ -76,7 +76,7 @@ function tooltip(model, formatTime) {
     // was taken and how to get a fresh one.
     if (m.state === "charging" && m.measuredAt != null) {
       var format = formatTime || hhmm
-      text += " · measured at " + format(m.measuredAt) + " — turn the mouse off and on to measure again"
+      text += "\nmeasured at " + format(m.measuredAt) + " — turn the mouse off and on to measure again"
     }
     return text
   }

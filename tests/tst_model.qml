@@ -127,7 +127,7 @@ TestCase {
   function test_charging_tooltip_says_when_the_level_was_measured() {
     var m = Model.applyLine(null, line({ ok: true, state: "charging", level: 89 }), 1000)
     var at = function(ms) { return ms === 1000 ? "19:12" : "??:??" }
-    compare(Model.tooltip(m, at), "DELUX M900 Pro · 89% · charging · measured at 19:12 — turn the mouse off and on to measure again")
+    compare(Model.tooltip(m, at), "DELUX M900 Pro · 89% · charging\nmeasured at 19:12 — turn the mouse off and on to measure again")
     var discharging = Model.applyLine(null, line({ ok: true, state: "discharging", level: 74 }), 1000)
     compare(Model.tooltip(discharging, at), "DELUX M900 Pro · 74% · on battery")
   }
